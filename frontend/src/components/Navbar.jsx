@@ -84,7 +84,7 @@ const Navbar = () => {
           <User>
             <VideoCallOutlinedIcon/>
             <AccountCircleOutlinedIcon />
-            <Avatar/>
+            <Avatar src={currentUser.img}/>
             {currentUser.name}
           </User>
         ) : (
