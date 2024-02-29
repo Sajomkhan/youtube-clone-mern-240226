@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  currentvideo: null,
+  currentVideo: null,
   loading: false,
   error: false,
 };
@@ -15,7 +15,7 @@ export const videoSlice = createSlice({
     },
     fetchSuccess: (state, action) => {
       state.loading = false;
-      state.currentUser = action.payload;
+      state.currentVideo = action.payload;
     },
     fetchFailure: (state, action) => {
       state.loading = false;

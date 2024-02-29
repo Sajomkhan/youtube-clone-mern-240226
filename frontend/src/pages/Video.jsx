@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import ThumbDownOffAltOutlinedIcon from "@mui/icons-material/ThumbDownOffAltOutlined";
 import ReplyOutlinedIcon from "@mui/icons-material/ReplyOutlined";
 import AddTaskOutlinedIcon from "@mui/icons-material/AddTaskOutlined";
@@ -114,23 +116,39 @@ const Video = () => {
   const { currentVideo } = useSelector((state) => state.video);
   const dispatch = useDispatch();
 
-  const path = useLocation().pathname.split("/")[2]
+  const path = useLocation().pathname.split("/")[2];
 
-  const [ channel, setChannel ] = useState({})
+  const [channel, setChannel] = useState({});
 
   useEffect(() => {
-    const fetchData = async() => {
+    const fetchData = async () => {
       try {
-        const videoRes = await axios.get(`/videos/find/${path}`)
-        const channelRes = await axios.get(`/users/find/${videoRes.data.userId}`)
-        setChannel(channelRes.data)
-        dispatch(fetchSuccess(videoRes.data))
-      } catch (err) {
-        
-      }
+        const videoRes = await axios.get(`/videos/find/${path}`);
+        const channelRes = await axios.get(
+          `/users/find/${videoRes.data.userId}`
+        );
+        setChannel(channelRes.data);
+        dispatch(fetchSuccess(videoRes.data));
+      } catch (err) {}
+    };
+    fetchData();
+  }, [path, dispatch]);
+
+  const handleLike = async () => {
+    try {
+      await axios.put(`/users/like/${currentUser._id}`)      
+    } catch (err) {
+      console.log(err);
     }
-    fetchData()
-  }, [path, dispatch])
+  }
+
+  const handleDislike = async () => {
+    try {
+      await axios.put(`/users/dislike/${currentUser._id}`)      
+    } catch (err) {
+      console.log(err);
+    }
+  }
 
   return (
     <Container>
@@ -148,13 +166,25 @@ const Video = () => {
         </VideoWrapper>
         <Title>{currentVideo?.title}</Title>
         <Details>
-          <Info>{currentVideo?.views} views • {format(currentVideo?.createdAt)}</Info>
+          <Info>
+            {currentVideo?.views} views • {format(currentVideo?.createdAt)}
+          </Info>
           <Buttons>
-            <Button>
-              <ThumbUpOutlinedIcon /> {currentVideo?.likes.length}
+            <Button onClick={handleLike}>
+              {currentVideo?.likes?.includes(currentUser._id) ? (
+                <ThumbUpIcon />
+              ) : (
+                <ThumbUpOutlinedIcon />
+              )}
+              {currentVideo?.likes?.length }
             </Button>
-            <Button>
-              <ThumbDownOffAltOutlinedIcon /> {currentVideo?.dislikes.length}
+            <Button onClick={handleDislike}>
+              {currentUser?.dislikes?.includes(currentUser._id) ? (
+                <ThumbDownIcon />
+              ) : (
+                <ThumbDownOffAltOutlinedIcon />
+              )}
+              {currentVideo?.dislikes?.length } 
             </Button>
             <Button>
               <ReplyOutlinedIcon /> Share
@@ -170,20 +200,18 @@ const Video = () => {
             <Image src={channel?.img} />
             <ChannelDetail>
               <ChannelName>{channel?.name}</ChannelName>
-              <ChannelCounter>{channel?.subscribers} subscribers</ChannelCounter>
-              <Description>
-              {currentVideo?.desc}
-              </Description>
+              <ChannelCounter>
+                {channel?.subscribers} subscribers
+              </ChannelCounter>
+              <Description>{currentVideo?.desc}</Description>
             </ChannelDetail>
           </ChannelInfo>
-          <Subscribe>SUBSCRIBE</Subscribe>
+          <Subscribe>{currentUser?.subscribedUsers?.includes(channel._id) ? "SUBSCRIBED" : "SUBSCRIBE"}</Subscribe>
         </Channel>
         <Hr />
         <Comments />
       </Content>
-      <Recommendation>
-   
-      </Recommendation>
+      <Recommendation />
     </Container>
   );
 };
